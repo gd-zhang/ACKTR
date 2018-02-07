@@ -9,13 +9,13 @@ An implementation of `ACKTR` in TensorFlow. ACKTR is one of the current SOTA pol
 
 ### Cons
 1. Only support sync computation which makes it slower than openai baseline. (I will update the code regularly and hopefully support async compuation soon.)
-2. Because the authors of ACKTR didn't run using sync code, so you need to tune the hyperparamters, especially hyperparamters for KFAC optimizer. (I'm tunning very hard and will update the best configuration regularly.)
+2. You need to tune the hyperparamters, especially hyperparamters for KFAC optimizer. (I'm tunning very hard and will update the best configuration regularly.)
 
 ## Actor Critic using Kronecker-Factored Trust Region (ACKTR)
 Actor Critic using Kronecker-Factored Trust Region was introduced in [ACKTR](https://arxiv.org/pdf/1708.05144.pdf). It used a recently proposed technique called [K-FAC](https://arxiv.org/abs/1503.05671) (a very strong optimzer) for actor-critic methods. It shows 2- to 3-fold improvement in sample efficiency.
 
 ### Environments Supported
-This implementation allows for using different environments. It's not restricted to OpenAI gym environments. If you want to attach the project to another environment rather than that provided by gym, all you have to do is to inherit from the base class `BaseEnv` in `envs/base_env.py`, and implement all the methods in a plug and play fashion (See the gym environment example class). You also have to add the name of the new environment class in `ACKTR.py\env_name_parser()` method.
+This implementation allows for using different environments. It's not restricted to OpenAI gym environments. If you want to attach the project to another environment rather than that provided by gym, all you have to do is to inherit from the base class `BaseEnv` in `envs/base_env.py`, and implement all the methods in a plug and play fashion.
 
 The methods that should be implemented in a new environment class are: 
 1. `make()` for creating the environment and returning a reference to it.
