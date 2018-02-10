@@ -9,7 +9,7 @@
   "num_iterations": 8e4,
   "learning_rate": 0.1,
   "damping": 0.01,
-  "kl_clip": 0.001,
+  "kl_clip": 0.0001,
   "moving_average": 0.99,
   "reward_discount_factor": 0.99,
   "max_to_keep": 4,

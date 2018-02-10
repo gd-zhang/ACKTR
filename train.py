@@ -110,7 +110,6 @@ class Trainer(BaseTrainer):
                 timestep = iteration * self.num_steps * self.env.num_envs
 
                 logger.record_tabular("niter", iteration)
-                logger.record_tabular("total_timesteps", timestep)
                 logger.record_tabular("fps", np.mean(fps_list))
                 logger.record_tabular("policy_entropy", np.mean(policy_entropy_list))
                 logger.record_tabular("loss", np.mean(loss_list))
