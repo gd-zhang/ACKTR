@@ -1,5 +1,5 @@
 # ACKTR
-An implementation of `ACKTR` in TensorFlow. ACKTR is one of the current SOTA policy gradient methods. Openai provides included the code for ACKTR in [baselines](https://github.com/openai/baselines). However, `acktr/kfac.py` is very hard to follow. So, I made the ACKTR based on [A2C](https://github.com/MG2033/A2C) and [Tensorflow KFAC](https://github.com/tensorflow/tensorflow/tree/master/tensorflow/contrib/kfac).
+An implementation of `ACKTR` in TensorFlow. ACKTR is one of the current SOTA policy gradient methods. Openai provides the code for ACKTR in [baselines](https://github.com/openai/baselines). However, `acktr/kfac.py` is very hard to follow. So, I made the ACKTR based on [A2C](https://github.com/MG2033/A2C) and [Tensorflow KFAC](https://github.com/tensorflow/tensorflow/tree/master/tensorflow/contrib/kfac).
 
 ### Pros
 1. Using tf.contrib.kfac which is easier to follow and well-written. (I copy `ops/*` from `tf.contrib.kfac` and modified it a little bit, you can switch back to tf.contrib.kfac)
