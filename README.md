@@ -7,10 +7,6 @@ An implementation of `ACKTR` in TensorFlow. ACKTR is one of the current SOTA pol
 3. Support for different policy networks in an easier way.
 4. Support for environments other than OpenAI gym in an easy way.
 
-### Cons
-1. Only support sync computation which makes it slower than openai baseline. (I will update the code regularly and hopefully support async compuation soon.)
-2. You need to tune the hyperparamters, especially hyperparamters for KFAC optimizer. (I'm tunning very hard and will update the best configuration regularly.)
-
 ## Actor Critic using Kronecker-Factored Trust Region (ACKTR)
 Actor Critic using Kronecker-Factored Trust Region was introduced in [ACKTR](https://arxiv.org/pdf/1708.05144.pdf). It used a recently proposed technique called [K-FAC](https://arxiv.org/abs/1503.05671) (a very strong optimzer) for actor-critic methods. It shows 2- to 3-fold improvement in sample efficiency.
 
