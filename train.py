@@ -9,6 +9,7 @@ from utils.lr_decay import LearningRateDecay
 from utils.utils import create_list_dirs
 import tensorflow as tf
 import logger
+import pdb
 
 
 class Trainer(BaseTrainer):
@@ -25,8 +26,7 @@ class Trainer(BaseTrainer):
         self.dones = None
         self.env = None
         # KFAC
-        self.cov_iter = int(self.args.cov_iter)
-        self.inv_iter = int(self.args.inv_iter)
+        self.dequeue_op = None
 
         self.num_iterations = int(self.args.num_iterations)
 
@@ -53,24 +53,28 @@ class Trainer(BaseTrainer):
         self.dones = [False for _ in range(self.env.num_envs)]
 
         tstart = time.time()
-        loss_list = np.zeros(10, )
-        policy_loss_list = np.zeros(10, )
-        value_loss_list = np.zeros(10, )
-        policy_entropy_list = np.zeros(10, )
-        fps_list = np.zeros(10, )
-        ev = np.zeros(10, )
+        loss_list = np.zeros(50, )
+        policy_loss_list = np.zeros(50, )
+        value_loss_list = np.zeros(50, )
+        policy_entropy_list = np.zeros(50, )
+        fps_list = np.zeros(50, )
+        ev = np.zeros(50, )
         arr_idx = 0
         start_iteration = self.global_step_tensor.eval(self.sess)
         self.global_time_step = self.global_time_step_tensor.eval(self.sess)
 
-        # # queue
-        # queue = tf.FIFOQueue(1, [item.get_cov().dtype for item in self.model.factors],
-        #                         [item.get_cov().get_shape() for item in self.model.factors])
+        # queue
+        inv_dummy = list(self.model.inv_update_dict.values())
+        queue = tf.FIFOQueue(1, [item.dtype for item in inv_dummy],
+                                [item.get_shape() for item in inv_dummy])
         # enqueue_op = tf.cond(tf.equal(tf.mod(self.global_step_tensor, self.inv_iter), tf.convert_to_tensor(0)),
-        #                      lambda: queue.enqueue(self.model.inv_update_op), tf.no_op)
-        # q_runner = tf.train.QueueRunner(queue, [enqueue_op])
-        # coord = tf.train.Coordinator()
-        # enqueue_threads = q_runner.create_threads(self.sess, coord=coord, start=True)
+        #                      lambda: queue.enqueue(self.model.inv_update_dict.value()), tf.no_op)
+        enqueue_op = queue.enqueue(list(self.model.inv_update_dict.values()))
+        self.dequeue_op = queue.dequeue()
+
+        q_runner = tf.train.QueueRunner(queue, [enqueue_op])
+        coord = tf.train.Coordinator()
+        enqueue_threads = q_runner.create_threads(self.sess, coord=coord, start=True)
         for iteration in tqdm(range(start_iteration, self.num_iterations + 1, 1), initial=start_iteration,
                               total=self.num_iterations):
 
@@ -84,9 +88,9 @@ class Trainer(BaseTrainer):
             # if not (arr_idx + 1) % self.cov_iter:
             #     self.__cov_update()
 
-            # Update inv
-            if not (arr_idx + 1) % self.inv_iter:
-                self.__inv_update()
+            # # Update inv
+            # if not (arr_idx + 1) % self.inv_iter:
+            #     self.__inv_update()
 
             # Calculate and Summarize
             loss_list[arr_idx] = loss
@@ -102,7 +106,7 @@ class Trainer(BaseTrainer):
                 self.global_step_input: self.global_step_tensor.eval(self.sess) + 1})
             arr_idx += 1
 
-            if not arr_idx % 10:
+            if not arr_idx % 50:
                 timestep = iteration * self.num_steps * self.env.num_envs
 
                 logger.record_tabular("niter", iteration)
@@ -117,8 +121,8 @@ class Trainer(BaseTrainer):
                 arr_idx = 0
             if iteration % self.save_every == 0:
                 self.save()
-        # coord.request_stop()
-        # coord.join(enqueue_threads)
+        coord.request_stop()
+        coord.join(enqueue_threads)
         self.env.close()
 
     def test(self, total_timesteps, env):
@@ -147,8 +151,8 @@ class Trainer(BaseTrainer):
     # def __cov_update(self):
     #     _ = self.sess.run([self.model.cov_update_op])
 
-    def __inv_update(self):
-        _ = self.sess.run([self.model.inv_update_op])
+    # def __inv_update(self):
+    #     _ = self.sess.run([self.model.inv_update_op])
 
     def __rollout_update(self, observations, states, rewards, masks, actions, values):
         # Updates the model per trajectory for using parallel environments. Uses the train_policy.
@@ -163,9 +167,9 @@ class Trainer(BaseTrainer):
             # Leave it for now. It's for LSTM policy.
             feed_dict[self.model.S] = states
             feed_dict[self.model.M] = masks
-        loss, policy_loss, value_loss, policy_entropy, _, _ = self.sess.run(
+        loss, policy_loss, value_loss, policy_entropy, _, _, _ = self.sess.run(
             [self.model.loss, self.model.policy_gradient_loss, self.model.value_function_loss, self.model.entropy,
-             self.model.optimize, self.model.cov_update_op],
+             self.model.optimize, self.model.cov_update_op, self.dequeue_op],
             feed_dict
         )
         return loss, policy_loss, value_loss, policy_entropy

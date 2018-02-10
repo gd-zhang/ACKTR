@@ -104,8 +104,8 @@ class Model:
             self.optimize = optimizer.apply_gradients(grads)
             self.cov_update_op = optimizer.cov_update_op
             self.inv_update_op = optimizer.inv_update_op
+            self.inv_update_dict = optimizer.inv_updates_dict
             self.factors = self.layer_collection.get_factors()
-
 
     def build(self, observation_space_params, num_actions):
         self.__set_observation_space_params(observation_space_params)

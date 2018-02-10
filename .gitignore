@@ -111,5 +111,5 @@ run
 .DS_Store
 
 #
-experiments／
-config_gd/
+experiments/
+config/
